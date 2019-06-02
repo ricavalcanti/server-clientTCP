@@ -20,14 +20,14 @@ def send(event=None):  # event is passed by binders.
     msg = my_msg.get()
     my_msg.set("")  # Clears input field.
     client_socket.send(bytes(msg, "utf8"))
-    if msg == "{quit}":
+    if msg == "sair()":
         client_socket.close()
         top.quit()
 
 
 def on_closing(event=None):
     """This function is to be called when the window is closed."""
-    my_msg.set("{quit}")
+    my_msg.set("sair()")
     send()
 
 top = tkinter.Tk()
@@ -54,7 +54,7 @@ top.protocol("WM_DELETE_WINDOW", on_closing)
 
 #----Now comes the sockets part----
 HOST = '192.168.0.21'
-PORT = 12001
+PORT = 12003
 
 BUFSIZ = 1024
 ADDR = (HOST, PORT)

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
-#Falta - Aceitar alteração de nome do cliente
+#Falta
 #Clientes conectados solicitada na tela do servidor
+#Encerrar todos os clientes ao fechar o server
+#implementar chat privado
 """Server for multithreaded (asynchronous) chat application."""
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
@@ -20,7 +22,7 @@ def handle_client(client):  # Takes client socket as argument.
     """Handles a single client connection."""
 
     name = client.recv(BUFSIZ).decode("utf8")
-    welcome = 'Welcome %s! If you ever want to quit, type {quit} to exit.' % name
+    welcome = 'Welcome %s! If you ever want to quit, type sair() to exit.' % name
     client.send(bytes(welcome, "utf8"))
     msg = "%s has joined the chat!" % name
     broadcast(bytes(msg, "utf8"))
@@ -28,20 +30,29 @@ def handle_client(client):  # Takes client socket as argument.
 
     while True:
         msg = client.recv(BUFSIZ)
-        if msg != bytes("{quit}", "utf8"):
-            if msg == bytes("{list}", "utf8"):
+        if msg != bytes("sair()", "utf8"):
+            if msg == bytes("lista()", "utf8"):
                 msg = ""
                 for client in clients:
                     port, ip = addresses[client]
                     infoClient = "<" + clients[client] + ", " + str(ip) + ", " + str(port) + ">"
                     msg = msg + infoClient
                 broadcast(bytes(msg, "utf8"))
+            elif(((msg.decode("utf8"))).find("privado(") != -1):
+                #inicia conversa privada cm usuário
+                user = msg.decode("utf8")[8:].replace(')','')
+                print(user)
+            elif(((msg.decode("utf8"))).find("nome(") != -1):
+                newName = msg.decode("utf8")[5:].replace(')','')
+                name = newName
+                clients[client] = newName
             else:
                 broadcast(msg, name+" escreveu: ")
         else:
-            client.send(bytes("{quit}", "utf8"))
+            client.send(bytes("sair()", "utf8"))
             client.close()
             del clients[client]
+            del addresses[client]
             broadcast(bytes("%s has left the chat." % name, "utf8"))
             break
 
@@ -55,7 +66,7 @@ clients = {}
 addresses = {}
 
 HOST = ''
-PORT = 12001
+PORT = 12003
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
 
