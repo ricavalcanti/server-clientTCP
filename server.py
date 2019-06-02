@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-#Falta
-#Clientes conectados solicitada na tela do servidor
-#Encerrar todos os clientes ao fechar o server
-#implementar chat privado
+# Falta
+# Clientes conectados solicitada na tela do servidor
+# Encerrar todos os clientes ao fechar o server
+# implementar chat privado
 """Server for multithreaded (asynchronous) chat application."""
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
@@ -13,7 +13,8 @@ def accept_incoming_connections():
     while True:
         client, client_address = SERVER.accept()
         print("%s:%s has connected." % client_address)
-        client.send(bytes("Greetings from the cave! Now type your name and press enter!", "utf8"))
+        client.send(
+            bytes("Greetings from the cave! Now type your name and press enter!", "utf8"))
         addresses[client] = client_address
         Thread(target=handle_client, args=(client,)).start()
 
@@ -35,15 +36,19 @@ def handle_client(client):  # Takes client socket as argument.
                 msg = ""
                 for client in clients:
                     port, ip = addresses[client]
-                    infoClient = "<" + clients[client] + ", " + str(ip) + ", " + str(port) + ">"
+                    infoClient = "<" + clients[client] + \
+                        ", " + str(ip) + ", " + str(port) + ">"
                     msg = msg + infoClient
                 broadcast(bytes(msg, "utf8"))
             elif(((msg.decode("utf8"))).find("privado(") != -1):
-                #inicia conversa privada cm usuário
-                user = msg.decode("utf8")[8:].replace(')','')
+                # inicia conversa privada cm usuário
+                user = msg.decode("utf8")[8:].replace(')', '')
                 print(user)
+                for client,userName in clients.items():
+                    if(userName == name):
+                        print(client)
             elif(((msg.decode("utf8"))).find("nome(") != -1):
-                newName = msg.decode("utf8")[5:].replace(')','')
+                newName = msg.decode("utf8")[5:].replace(')', '')
                 name = newName
                 clients[client] = newName
             else:
@@ -61,12 +66,12 @@ def broadcast(msg, prefix=""):  # prefix is for name identification.
     for sock in clients:
         sock.send(bytes(prefix, "utf8")+msg)
 
-        
+
 clients = {}
 addresses = {}
 
 HOST = ''
-PORT = 12003
+PORT = 12000
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
 
