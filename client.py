@@ -58,7 +58,7 @@ top.protocol("WM_DELETE_WINDOW", on_closing)
 
 # ----Now comes the sockets part----
 HOST = '192.168.0.21'
-PORT = 12000
+PORT = 12001
 
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
