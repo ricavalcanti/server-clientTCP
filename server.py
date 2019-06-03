@@ -19,9 +19,9 @@ def accept_incoming_connections():
         Thread(target=handle_client, args=(client,)).start()
 
 
-def handle_client(client):  # Takes client socket as argument.
-    """Handles a single client connection."""
-
+def handle_client(client):
+    isPrivate = False
+    myPrivateClient = None
     name = client.recv(BUFSIZ).decode("utf8")
     welcome = 'Welcome %s! If you ever want to quit, type sair() to exit.' % name
     client.send(bytes(welcome, "utf8"))
@@ -32,7 +32,14 @@ def handle_client(client):  # Takes client socket as argument.
     while True:
         msg = client.recv(BUFSIZ)
         if msg != bytes("sair()", "utf8"):
-            if msg == bytes("lista()", "utf8"):
+            if msg == bytes("{S}", "utf8"):
+                # procurar no dict pra saber qual o outro cliente
+                isPrivate = True
+                myPrivateClient = privateChats[client]
+                myPrivateClient.send(
+                    bytes("Voce esta em um chat privado", "utf8"))
+                client.send(bytes("Voce esta em um chat privado", "utf8"))
+            elif msg == bytes("lista()", "utf8"):
                 msg = ""
                 for client in clients:
                     port, ip = addresses[client]
@@ -42,11 +49,16 @@ def handle_client(client):  # Takes client socket as argument.
                 broadcast(bytes(msg, "utf8"))
             elif(((msg.decode("utf8"))).find("privado(") != -1):
                 # inicia conversa privada cm usuário
-                user = msg.decode("utf8")[8:].replace(')', '')
-                print(user)
-                for client,userName in clients.items():
-                    if(userName == name):
-                        print(client)
+                isPrivate = True
+                otherClientName = msg.decode("utf8")[8:].replace(')', '')
+                for otherClient, userName in clients.items():
+                    if(userName == otherClientName):
+                        print(userName)
+                        print(name)
+                        otherClient.send(
+                            bytes("Iniciar chat privado? {S/n}", "utf8"))
+                        privateChats[otherClient] = client
+
             elif(((msg.decode("utf8"))).find("nome(") != -1):
                 newName = msg.decode("utf8")[5:].replace(')', '')
                 name = newName
@@ -69,6 +81,10 @@ def broadcast(msg, prefix=""):  # prefix is for name identification.
 
 clients = {}
 addresses = {}
+privateChats = {}
+isPrivate = {}
+dNames = {}
+dClientsInfo = []
 
 HOST = ''
 PORT = 12000
