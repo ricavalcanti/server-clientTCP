@@ -11,6 +11,9 @@ def receive():
     while True:
         try:
             msg = client_socket.recv(BUFSIZ).decode("utf8")
+            if msg == "Usuario recusou chat privado":
+                print('vamo sair do privado')
+                client_socket.send(bytes("sairPrivado()", "utf8"))
             msg_list.insert(tkinter.END, msg)
         except OSError:  # Possibly client has left the chat.
             break
@@ -37,7 +40,7 @@ top.title("Chatter")
 
 messages_frame = tkinter.Frame(top)
 my_msg = tkinter.StringVar()  # For the messages to be sent.
-my_msg.set("Type your messages here.")
+# my_msg.set("Type your messages here.")
 # To navigate through past messages.
 scrollbar = tkinter.Scrollbar(messages_frame)
 # Following will contain the messages.
@@ -58,7 +61,7 @@ top.protocol("WM_DELETE_WINDOW", on_closing)
 
 # ----Now comes the sockets part----
 HOST = '192.168.0.21'
-PORT = 12001
+PORT = 12000
 
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
